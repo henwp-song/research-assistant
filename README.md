@@ -1,73 +1,102 @@
-# React + TypeScript + Vite
+# 🔬 组会科研助手 Research Assistant
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[English](./README_EN.md)
 
-Currently, two official plugins are available:
+一个基于 Tauri 的跨平台桌面应用，专为科研组会场景设计。集录音转写、文献管理、AI 摘要、知识库、待办追踪于一体。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 功能概览
 
-## React Compiler
+| 模块 | 功能 |
+|------|------|
+| 📝 **组会管理** | 日程创建、录音转写（本地/云端 Whisper）、AI 摘要生成、Markdown 笔记、待办事项 |
+| 📚 **文献管理** | PDF 拖入自动解析、联网查询元数据（CrossRef / Semantic Scholar）、AI 结构化分析 |
+| 📂 **研究工作** | 研究方向分类、组会/文献归类、进度条追踪、里程碑管理 |
+| ✏️ **笔记系统** | 全功能 Markdown 编辑器、`[[双链]]` 引用、多标签分类、反向链接 |
+| 🧠 **知识库** | LanceDB 向量存储、语义搜索、一键重建索引 |
+| 🤖 **AI 引擎** | 本地/云端双模式 — Whisper + Ollama 免费离线，OpenAI API 按需使用 |
+| ⏰ **桌面组件** | 悬浮倒计时窗口、下次组会提醒 |
+| 🔍 **全局搜索** | SQLite 全文搜索 + RAG 语义搜索 |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 技术栈
 
-## Expanding the ESLint configuration
+| 层 | 技术 |
+|----|------|
+| 桌面框架 | Tauri 2.0 (Rust) |
+| 前端 | React 19 + TypeScript + Tailwind CSS v4 |
+| AI 后端 | Python FastAPI |
+| 语音识别 | faster-whisper (本地) / OpenAI Whisper API (云端) |
+| 大语言模型 | Ollama (本地) / OpenAI API (云端) |
+| 向量数据库 | LanceDB + sentence-transformers |
+| 元数据 | SQLite (via rusqlite) |
+| 文献解析 | PyMuPDF + CrossRef / Semantic Scholar API |
+| 笔记编辑 | Milkdown (WYSIWYG Markdown) |
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 快速开始
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 环境要求
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Node.js** ≥ 18
+- **Rust** ≥ 1.77
+- **Python** ≥ 3.10
+- Windows: WebView2（通常已预装）
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 安装依赖
+
+```bash
+# 前端依赖
+npm install
+
+# Python 后端依赖
+pip install -r python-backend/requirements.txt
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 启动开发模式
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# 1. 启动 Python 后端
+python python-backend/main.py
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 2. 启动 Tauri 桌面应用
+npm run tauri:dev
 ```
+
+### 本地方案（无需 API Key）
+
+| 组件 | 使用方式 |
+|------|---------|
+| 语音转文字 | 设置中选择「本地 Whisper」，首次自动下载模型 |
+| AI 摘要 | 安装 [Ollama](https://ollama.com) → `ollama pull qwen2.5:3b` → 设置选 Ollama |
+
+> 全本地模式下，数据处理完全离线，隐私安全。
+
+### 打包生产版本
+
+```bash
+npm run tauri:build
+```
+
+## 项目结构
+
+```
+├── src-tauri/              # Tauri 主进程 (Rust)
+│   ├── src/lib.rs           # 数据库、IPC 命令、窗口管理
+│   └── tauri.conf.json      # Tauri 配置
+├── src/                    # 前端 (React + TypeScript)
+│   ├── pages/               # 页面组件
+│   │   ├── MeetingsPage     # 组会管理
+│   │   ├── LiteraturePage   # 文献管理
+│   │   ├── WorksPage        # 研究工作
+│   │   ├── NotesPage        # 笔记管理
+│   │   └── SettingsPage     # 设置
+│   ├── components/          # 通用组件
+│   ├── lib/                 # API 客户端、数据层、工具
+│   └── stores/              # Zustand 状态管理
+├── python-backend/         # AI 服务 (FastAPI)
+│   ├── main.py              # 入口
+│   └── services/            # ASR / LLM / PDF / RAG 服务
+└── package.json
+```
+
+## License
+
+MIT
